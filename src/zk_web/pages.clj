@@ -10,6 +10,9 @@
         [zk-web.util]
         [hiccup page form element core]))
 
+;; global users to token map
+(def users-token-map (atom {}) )
+
 ;; util functions
 
 (defn node-link
@@ -31,7 +34,7 @@
   []
   (let [header (:headers (req/ring-request) {"referer" "/"})
         referer (header "referer")]
-    referer))
+    (if (nil? referer) "/" referer) ))
 
 (defn init-zk-client [addr]
   (let [addr (str/trim addr)
@@ -268,11 +271,19 @@
               [:div.form-actions
                [:button.btn.btn-primary {:type "submit"} "Login"]])]]))
 
+(defn on-login-success [user email] 
+  (let [new-uuid (str (java.util.UUID/randomUUID)) ]
+     (session/put! :user user)
+     (when-not (nil? email) (session/put! :email email))
+     (cookies/put! :token new-uuid)
+     (swap! users-token-map #(assoc %1 %2 %3) user new-uuid )) )
+
 (defpage [:post "/login"] {:keys [user pass target]}
+  (if (= target "/login") (def target "/"))
   (cond
    (= (all-users user) pass) (do
-                               (session/put! :user user)
-                               (resp/redirect target))
+                               (on-login-success user)
+                               (resp/redirect target) )
    :else (render [:get "/login"]
                  {:msg "Incorrect password." :target target})))
 
