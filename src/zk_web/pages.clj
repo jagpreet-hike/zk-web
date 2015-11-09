@@ -258,6 +258,7 @@
    [:div.span3.offset3
     [:div.row
      (when-not (nil? msg) [:div.alert.alert-error [:h4 msg]])
+     (link-to "gauth" [:img {:src "/img/g-login.png"}])
      (form-to [:post "/login"]
               (label "user" "User Name")
               [:input.span3 {:type "text" :name "user"}]

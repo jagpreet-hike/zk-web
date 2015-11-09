@@ -2,9 +2,10 @@
   (:gen-class)
   (:require [noir.server :as server]
             [zk-web.conf :as conf]
+            [zk-web.google-login]
             ))
 
-(server/load-views-ns 'zk-web.pages)
+(server/load-views-ns 'zk-web.pages 'zk-web.google-login)
 
 
 (defn -main [& m]
