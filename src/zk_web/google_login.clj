@@ -11,7 +11,6 @@
 (def CLIENT_ID "839489213646-h4grs7j97p39rncvh7uahrv5djscp45a.apps.googleusercontent.com")
 (def REDIRECT_URI "http://localhost:8080/google")
 (def CLIENT_SECRET "PqBrqFSFfgivzYDNS4S6fQVq")
-(def google-user (atom {:google-id "" :google-name "" :google-email ""}))
  
 (def redirect-url (str "https://accounts.google.com/o/oauth2/auth?"
               "scope=email%20profile&"
@@ -23,7 +22,7 @@
  
 (defn google [code]
  (if-not (nil? code)
-	 (let [access-token-response (http-client/post "https://accounts.google.com/o/oauth2/token"
+	 (let [access-token-response (http-client/post "https://www.googleapis.com/oauth2/v3/token"
 	                                          {:form-params {:code code
 	                                           :client_id CLIENT_ID
 	                                           :client_secret CLIENT_SECRET
