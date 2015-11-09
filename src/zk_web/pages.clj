@@ -289,8 +289,11 @@
 
 (defpage "/logout" []
   (do
-    (session/put! :user nil)
-    (resp/redirect (referer))))
+    (swap! users-token-map #(dissoc %1 %2) (session/get :user))
+    (session/remove! :user)
+    (session/remove! :email)
+    (cookies/put! :token {:value "0" :expires 1})
+    (resp/redirect (referer)) ))
 
 (defpage [:post "/edit"] {:keys [path data]}
   (when-admin
