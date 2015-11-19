@@ -1,8 +1,17 @@
 (ns zk-web.zk
+  (:require [noir.session :as session])
   (:import [com.netflix.curator.retry RetryNTimes]
            [com.netflix.curator.framework CuratorFramework CuratorFrameworkFactory])
   (:refer-clojure :exclude [set get])
-  (:use zk-web.util))
+  (:use zk-web.util
+        clojure.tools.logging))
+
+(defn- log-message
+  "logs/sends message to required output/hook"
+  [message]
+  (info message)
+  (post-to-slack message)
+)
 
 (defn- mk-zk-cli-inner
   "Create a zk client using addr as connecting string"
@@ -20,20 +29,26 @@
 (defn create
   "Create a node in zk with a client"
   ([cli path data]
+    (do
+     (log-message (str (session/get :user) " requested to create: " path " with data " data))
      (-> cli
       (.create)
       (.creatingParentsIfNeeded)
-      (.forPath path data)))
+      (.forPath path data))) ) 
   ([cli path]
+    (do
+     (log-message (str (session/get :user) " requested to create: " path))
      (-> cli
          (.create)
          (.creatingParentsIfNeeded)
-         (.forPath path))))
+         (.forPath path))) ) )
 
 (defn rm
   "Delete a node in zk with a client"
   [cli path]
-  (-> cli (.delete) (.forPath path)))
+  (do
+    (log-message (str (session/get :user) " requested to remove: " path))
+    (-> cli (.delete) (.forPath path))) )
 
 (defn ls
   "List children of a node"
@@ -48,7 +63,9 @@
 (defn set
   "Set data to a node"
   [cli path data]
-  (-> cli (.setData) (.forPath path data)))
+  (do
+    (log-message (str (session/get :user) " requested to set data " data " for path " path))
+    (-> cli (.setData) (.forPath path data))) )
 
 (defn get
   "Get data from a node"
@@ -58,7 +75,8 @@
 (defn rmr
   "Remove recursively"
   [cli path]
-  (println "rmr " path)
-  (doseq [child (ls cli path)]
-    (rmr cli (child-path path child)))
-  (rm cli path))
+  (do 
+    (log-message (str (session/get :user) " requested to Recursively delete: " path))
+    (doseq [child (ls cli path)]
+      (rmr cli (child-path path child)))
+    (rm cli path)) )

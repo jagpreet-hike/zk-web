@@ -8,7 +8,8 @@
             [clojure.string :as str])
   (:use [noir.core]
         [zk-web.util]
-        [hiccup page form element core]))
+        [hiccup page form element core]
+        [clojure.tools.logging]))
 
 ;; global users to token map
 (def users-token-map (atom {}) )
@@ -273,6 +274,7 @@
 
 (defn on-login-success [user email] 
   (let [new-uuid (str (java.util.UUID/randomUUID)) ]
+     (info (str user " logged in") )
      (session/put! :user user)
      (when-not (nil? email) (session/put! :email email))
      (cookies/put! :token new-uuid)

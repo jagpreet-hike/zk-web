@@ -1,6 +1,8 @@
 (ns zk-web.util
-  (:require [noir.session :as session])
-  (:import [java.nio.charset Charset]))
+  (:require [clj-http.client :as http-client]
+            [noir.session :as session])
+  (:import [java.nio.charset Charset])
+  )
 
 (defn bytes->str
   "Convert byte[] to String"
@@ -52,3 +54,10 @@
 (defn str->int [string]
   (if string
     (Integer. (re-find  #"\d+" string ))))
+
+(defn post-to-slack
+  "send payload/message to server-bot channel on slack"
+  [text]
+  (http-client/post "your slack hook address" 
+    {:form-params {:payload (str "{ \"text\": \"" text "\" }") }} ))
+

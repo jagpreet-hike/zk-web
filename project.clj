@@ -5,5 +5,6 @@
                            [com.netflix.curator/curator-framework "1.1.16"]
                            [com.netflix.curator/curator-test "1.1.16"]
                            [clj-http "2.0.0"]
-                           [cheshire "5.5.0"]]
+                           [cheshire "5.5.0"]
+                           [org.clojure/tools.logging "0.3.1"]]
             :main zk-web.server)
