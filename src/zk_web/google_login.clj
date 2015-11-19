@@ -8,9 +8,9 @@
 	(:use [noir.core])
 	)
 
-(def CLIENT_ID "839489213646-h4grs7j97p39rncvh7uahrv5djscp45a.apps.googleusercontent.com")
+(def CLIENT_ID "839489213646-74io2blumtjksm0ba8pj7prnu53podve.apps.googleusercontent.com")
 (def REDIRECT_URI "http://localhost:8080/google")
-(def CLIENT_SECRET "PqBrqFSFfgivzYDNS4S6fQVq")
+(def CLIENT_SECRET "YMFU3nJwmMEANiXjNCsNuGEl")
  
 (def redirect-url (str "https://accounts.google.com/o/oauth2/auth?"
               "scope=email%20profile&"
@@ -30,8 +30,11 @@
 	                                           :grant_type "authorization_code"}})
 	       user-details (json-parser/parse-string (:body (http-client/get (str "https://www.googleapis.com/oauth2/v1/userinfo?access_token="
 	 (get (json-parser/parse-string (:body access-token-response)) "access_token")))))]
-	 ( on-login-success (get user-details "name") (get user-details "email") )
-	 (resp/redirect "/") ) 
+	 (if (.endsWith (get user-details "email") "@hike.in") 
+	 	(do ( on-login-success (get user-details "name") (get user-details "email") )
+	 		(resp/redirect "/"))
+	 	(render [:get "/login"]
+ 			{:msg "Please Use only Hike Email Ids." :target "/"}) )) 
 
  	 (render [:get "/login"]
  		{:msg "Something went wrong. Try again." :target "/"}) ))
