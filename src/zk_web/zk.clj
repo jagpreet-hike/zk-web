@@ -8,9 +8,10 @@
 
 (defn- log-message
   "logs/sends message to required output/hook"
-  [message]
-  (info message)
-  (post-to-slack message)
+  [cli message]
+  (def msg (str message " ( Connection String: " (-> cli (.getZookeeperClient) (.getCurrentConnectionString) ) " )") )
+  (info msg)
+  (post-to-slack msg)
 )
 
 (defn- mk-zk-cli-inner
@@ -30,14 +31,14 @@
   "Create a node in zk with a client"
   ([cli path data]
     (do
-     (log-message (str (session/get :user) " requested to create: " path " with data " data))
+     (log-message cli (str (session/get :user) " is creating: " path " with data " (new String data)))
      (-> cli
       (.create)
       (.creatingParentsIfNeeded)
       (.forPath path data))) ) 
   ([cli path]
     (do
-     (log-message (str (session/get :user) " requested to create: " path))
+     (log-message cli (str (session/get :user) " is creating: " path))
      (-> cli
          (.create)
          (.creatingParentsIfNeeded)
@@ -47,7 +48,7 @@
   "Delete a node in zk with a client"
   [cli path]
   (do
-    (log-message (str (session/get :user) " requested to remove: " path))
+    (log-message cli (str (session/get :user) " is removing: " path))
     (-> cli (.delete) (.forPath path))) )
 
 (defn ls
@@ -64,7 +65,7 @@
   "Set data to a node"
   [cli path data]
   (do
-    (log-message (str (session/get :user) " requested to set data " data " for path " path))
+    (log-message cli (str (session/get :user) " is setting data: " (new String data) " for path " path))
     (-> cli (.setData) (.forPath path data))) )
 
 (defn get
@@ -76,7 +77,7 @@
   "Remove recursively"
   [cli path]
   (do 
-    (log-message (str (session/get :user) " requested to Recursively delete: " path))
+    (log-message cli (str (session/get :user) " is removing Recursively: " path))
     (doseq [child (ls cli path)]
       (rmr cli (child-path path child)))
     (rm cli path)) )
