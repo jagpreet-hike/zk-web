@@ -258,19 +258,20 @@
   (resp/redirect "/node"))
 
 (defpage [:get "/login"] {:keys [msg target]}
-  (layout
-   [:div.span3.offset3
-    [:div.row
-     (when-not (nil? msg) [:div.alert.alert-error [:h4 msg]])
-     (link-to "gauth" [:img {:src "/img/g-login.png"}])
-     (form-to [:post "/login"]
-              (label "user" "User Name")
-              [:input.span3 {:type "text" :name "user"}]
-              (label "pass" "Pass Word")
-              [:input.span3 {:type "password" :name "pass"}]
-              [:input.span3 {:type "hidden" :name "target" :value (if (nil? target) (referer) target)}]
-              [:div.form-actions
-               [:button.btn.btn-primary {:type "submit"} "Login"]])]]))
+  (resp/redirect "gauth"))
+  ; (layout
+  ;  [:div.span3.offset3
+  ;   [:div.row
+  ;    (when-not (nil? msg) [:div.alert.alert-error [:h4 msg]])
+  ;    (link-to "gauth" [:img {:src "/img/g-login.png"}])
+  ;    (form-to [:post "/login"]
+  ;             (label "user" "User Name")
+  ;             [:input.span3 {:type "text" :name "user"}]
+  ;             (label "pass" "Pass Word")
+  ;             [:input.span3 {:type "password" :name "pass"}]
+  ;             [:input.span3 {:type "hidden" :name "target" :value (if (nil? target) (referer) target)}]
+  ;             [:div.form-actions
+  ;              [:button.btn.btn-primary {:type "submit"} "Login"]])]]))
 
 (defn on-login-success [user email] 
   (let [new-uuid (str (java.util.UUID/randomUUID)) ]
@@ -284,7 +285,7 @@
   (if (= target "/login") (def target "/"))
   (cond
    (= (all-users user) pass) (do
-                               (on-login-success user)
+                               (on-login-success user nil)
                                (resp/redirect target) )
    :else (render [:get "/login"]
                  {:msg "Incorrect password." :target target})))
