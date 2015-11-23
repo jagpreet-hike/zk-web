@@ -1,17 +1,21 @@
 (ns zk-web.zk
-  (:require [noir.session :as session])
+  (:require [noir.session :as session]
+            [zk-web.conf :as conf])
   (:import [org.apache.curator.retry RetryNTimes]
            [org.apache.curator.framework CuratorFramework CuratorFrameworkFactory])
   (:refer-clojure :exclude [set get])
   (:use zk-web.util
         clojure.tools.logging))
 
+(def prod-ips (:prod-ips conf/load-conf))
+
 (defn- log-message
   "logs/sends message to required output/hook"
-  [cli message]
-  (def msg (str message " ( Connection String: " (-> cli (.getZookeeperClient) (.getCurrentConnectionString) ) " )") )
-  (info msg)
-  (post-to-slack msg)
+  [cli doing path data]
+  (let [connectString (-> cli (.getZookeeperClient) (.getCurrentConnectionString) )]
+  (def msg (str (session/get :user) " is " doing ": " path " ( Connection String: " connectString " ) " (if (nil? data) "" (str " Data: " data)) ) )
+    (info msg)
+    (post-to-slack msg) )
 )
 
 (defn- mk-zk-cli-inner
@@ -31,14 +35,14 @@
   "Create a node in zk with a client"
   ([cli path data]
     (do
-     (log-message cli (str (session/get :user) " is creating: " path " with data " (new String data)))
+     (log-message cli "creating" path (new String data))
      (-> cli
       (.create)
       (.creatingParentsIfNeeded)
       (.forPath path data))) ) 
   ([cli path]
     (do
-     (log-message cli (str (session/get :user) " is creating: " path))
+     (log-message cli "creating" path nil)
      (-> cli
          (.create)
          (.creatingParentsIfNeeded)
@@ -48,7 +52,7 @@
   "Delete a node in zk with a client"
   [cli path]
   (do
-    (log-message cli (str (session/get :user) " is removing: " path))
+    (log-message cli "removing" path nil)
     (-> cli (.delete) (.forPath path))) )
 
 (defn ls
@@ -65,7 +69,7 @@
   "Set data to a node"
   [cli path data]
   (do
-    (log-message cli (str (session/get :user) " is setting data: " (new String data) " for path " path))
+    (log-message cli "updating" path (new String data))
     (-> cli (.setData) (.forPath path data))) )
 
 (defn get
@@ -77,7 +81,7 @@
   "Remove recursively"
   [cli path]
   (do 
-    (log-message cli (str (session/get :user) " is removing Recursively: " path))
+    (log-message cli "removing Recursively" path nil)
     (doseq [child (ls cli path)]
       (rmr cli (child-path path child)))
     (rm cli path)) )
