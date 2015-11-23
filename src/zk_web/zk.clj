@@ -7,7 +7,7 @@
   (:use zk-web.util
         clojure.tools.logging))
 
-(def prod-ips (:prod-ips conf/load-conf))
+(def prod-ips (:prod-ips (conf/load-conf)))
 
 (defn- log-message
   "logs/sends message to required output/hook"
@@ -15,7 +15,8 @@
   (let [connectString (-> cli (.getZookeeperClient) (.getCurrentConnectionString) )]
   (def msg (str (session/get :user) " is " doing ": " path " ( Connection String: " connectString " ) " (if (nil? data) "" (str " Data: " data)) ) )
     (info msg)
-    (post-to-slack msg) )
+    (if (or (nil? prod-ips) (some #(boolean ( re-find (re-pattern (str "(^|.*[^0-9])" % "([^0-9].*|$)")) connectString ) ) prod-ips))
+      (post-to-slack msg) ) )
 )
 
 (defn- mk-zk-cli-inner
