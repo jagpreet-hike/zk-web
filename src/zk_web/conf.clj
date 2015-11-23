@@ -3,6 +3,8 @@
             [zk-web.util :as u])
   (:import [java.io File PushbackReader]))
 
+(def conf nil)
+
 (defn- valid-conf-file?
   "Check if a file exists and is a normal file"
   [path]
@@ -14,7 +16,7 @@
   (when (valid-conf-file? path)
     (read-string (slurp path :encoding "utf-8"))))
 
-(defn load-conf []
+(defn- load-conf-internal []
   "load the config from ~/.zk-web-conf.clj or conf/zk-web-conf.clj"
   (let [home-conf (str (System/getenv "HOME") File/separator ".zk-web-conf.clj")
         pwd-conf "conf/zk-web-conf.clj"
@@ -32,4 +34,10 @@
         (if env-node
           (assoc conf :default-node env-node)
           conf)))
+
+(defn load-conf []
+  "loads and/or returns config"
+  (when (nil? conf) 
+    (def conf (load-conf-internal)) )
+  conf)
 
