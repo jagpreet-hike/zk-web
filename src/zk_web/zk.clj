@@ -1,7 +1,7 @@
 (ns zk-web.zk
   (:require [noir.session :as session])
-  (:import [com.netflix.curator.retry RetryNTimes]
-           [com.netflix.curator.framework CuratorFramework CuratorFrameworkFactory])
+  (:import [org.apache.curator.retry RetryNTimes]
+           [org.apache.curator.framework CuratorFramework CuratorFrameworkFactory])
   (:refer-clojure :exclude [set get])
   (:use zk-web.util
         clojure.tools.logging))
