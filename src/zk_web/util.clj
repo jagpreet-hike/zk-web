@@ -57,7 +57,7 @@
 
 (defn post-to-slack
   "send payload/message to server-bot channel on slack"
-  [text]
-  (http-client/post "your slack hook address" 
+  [slack-hook text]
+  (http-client/post slack-hook 
     {:form-params {:payload (str "{ \"text\": \"" text "\" }") }} ))
 

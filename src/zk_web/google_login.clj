@@ -4,13 +4,14 @@
 	(:require [clj-http.client :as http-client]
 			  [cheshire.core :as json-parser]
 			  [noir.response :as resp]
-			  [zk-web.pages :refer [on-login-success]] ) 
+			  [zk-web.pages :refer [on-login-success]]
+			  [zk-web.conf :as conf] ) 
 	(:use [noir.core])
 	)
 
-(def CLIENT_ID "839489213646-74io2blumtjksm0ba8pj7prnu53podve.apps.googleusercontent.com")
-(def REDIRECT_URI "http://localhost:8080/google")
-(def CLIENT_SECRET "YMFU3nJwmMEANiXjNCsNuGEl")
+(def CLIENT_ID (:g-client-id (conf/load-conf)) )
+(def REDIRECT_URI (:g-redirect-url (conf/load-conf)) )
+(def CLIENT_SECRET (:g-client-secret (conf/load-conf)) )
  
 (def redirect-url (str "https://accounts.google.com/o/oauth2/auth?"
               "scope=email%20profile&"
