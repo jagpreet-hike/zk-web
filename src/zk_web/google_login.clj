@@ -19,7 +19,7 @@
               "response_type=code&"
               "client_id=" (ring.util.codec/url-encode CLIENT_ID) "&"
               "approval_prompt=force&"
-              "hd=hike.in"))
+              (if (nil? (:g-hd (conf/load-conf)) ) "" (str "hd=" (:g-hd (conf/load-conf))) ) ))
  
 (defn google [code]
  (if-not (nil? code)
