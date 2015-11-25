@@ -9,7 +9,7 @@ To use zk-web, you need [leiningen](https://github.com/technomancy/leiningen) an
 Run the following command:
 
 ```bash
-git clone git://github.com/qiuxiafei/zk-web.git
+git clone https://github.com/hike/zk-web.git
 cd zk-web
 lein deps # run this if you're using lein 1.x
 lein run
@@ -22,14 +22,16 @@ zk-web is also easy to configurate. It reads `$HOME/.zk-web-conf.clj` or `conf/z
 
 ```clojure
 {
- :server-port 8989  ;; optional, 8080 by default
- :users {
-         "admin" "hello"
-         ;; map of user -> password
-         ;; you can add more
-         }
- :default-node "localhost:2181/my-start-node" ;; optional
- }
+:server-port 8080
+:users {"admin" "hello"} ; optional
+:default-node ""
+:g-client-id  "Your Google OAuth2 clientID"
+:g-redirect-url "Your redirect address for OAuh2"
+:g-client-secret "Your Google OAuth2 ClientSecret"
+:g-hd "your org domain as registered on gmail" ;provide only if you have google mail for your domain and want to restrict login to only ids on this domain.
+:zk-ip2group {:ip1 :grp1 :ip2 :grp2 :ip3 :grp1} ;map ips to a group.(both ip and groupname are keywords that is start with a ":" followed by value. Like ":value" without quotes) (here ip1 and ip3 are in grp1
+:zk-slack-hooks {:grp1 "Slack hook to post changes to zk for grp1" :grp2 "Slack hook to post changes to zk for grp2"} ;when changes are made to zk with connection string having ip in group "grp", updates are logged to slack using hook corresponding to ":grp"
+}
 ```
 
 ## Features
