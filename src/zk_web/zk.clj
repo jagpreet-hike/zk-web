@@ -5,18 +5,21 @@
            [org.apache.curator.framework CuratorFramework CuratorFrameworkFactory])
   (:refer-clojure :exclude [set get])
   (:use zk-web.util
-        clojure.tools.logging))
+        clojure.tools.logging
+	[clojure.string :only (split)]))
 
-(def prod-ips (:prod-ips (conf/load-conf)) )
-(def slack-hook (:zk-slack-hook (conf/load-conf)) )
+(def zk-ip2group (:zk-ip2group (conf/load-conf)) )
+(def zk-slack-hooks (:zk-slack-hooks (conf/load-conf)) )
 
 (defn- log-message
   "logs/sends message to required output/hook"
   [cli doing path data]
-  (let [connectString (-> cli (.getZookeeperClient) (.getCurrentConnectionString) )]
+  (let [connectString (-> cli (.getZookeeperClient) (.getCurrentConnectionString) )
+       group (some #(zk-ip2group (keyword %)) (split connectString #"(:[0-9]*)?(,|$)")) 
+       slack-hook (zk-slack-hooks group)]
   (def msg (str (session/get :user) " is " doing ": " path " ( Connection String: " connectString " ) " (if (nil? data) "" (str " Data: " data)) ) )
     (info msg)
-    (if (or (nil? prod-ips) (some #(boolean ( re-find (re-pattern (str "(^|.*[^0-9])" % "([^0-9].*|$)")) connectString ) ) prod-ips))
+    (when-not (nil? slack-hook)
       (post-to-slack slack-hook msg) ) )
 )
 
