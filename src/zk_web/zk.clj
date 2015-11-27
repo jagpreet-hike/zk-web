@@ -6,7 +6,7 @@
   (:refer-clojure :exclude [set get])
   (:use zk-web.util
         clojure.tools.logging
-	[clojure.string :only (split)]))
+	[clojure.string :only (split replace)]))
 
 (def zk-ip2group (:zk-ip2group (conf/load-conf)) )
 (def zk-slack-hooks (:zk-slack-hooks (conf/load-conf)) )
@@ -20,7 +20,12 @@
   (def msg (str (session/get :user) " is " doing ": " path " ( Connection String: " connectString " ) " (if (nil? data) "" (str " Data: " data)) ) )
     (info msg)
     (when-not (nil? slack-hook)
-      (post-to-slack slack-hook msg) ) )
+      (try (post-to-slack slack-hook (replace msg #"\"" "\\\\\"") )
+        (catch Exception e (try (do
+          (post-to-slack slack-hook (str (session/get :user) " is " doing ": " path " ( Connection String: " connectString " ) " (if (nil? data) "" (str "(UNABLE TO POST DATA)" )) ) )
+          (error str("Unable to post data by " (session/get :user) " To slack")) )
+              (catch Exception e (error (str "Unable to Post update by " (session/get :user) " to Slack. Caught exception: " (.getMessage e))) )) 
+        )) ) )
 )
 
 (defn- mk-zk-cli-inner
